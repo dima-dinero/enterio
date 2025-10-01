@@ -343,9 +343,11 @@
   }
 
   function initProjectsPreviewSliders(root = document) {
-  $(root).find(".project-preview.w-dyn-list").each(function () {
+    $(root).find(".project-preview.w-dyn-list").each(function () {
     const swiperEl = this;
     if (!swiperEl || swiperEl.swiper) return;
+
+    const parent = $(swiperEl).parent(); 
 
     new Swiper(swiperEl, {
       direction: "horizontal",
@@ -364,10 +366,10 @@
           centeredSlides: true 
         }
       },
-    navigation: {
-      nextEl: $(this).parent().find(".swiper-next")[0],
-      prevEl: $(this).parent().find(".swiper-prev")[0],
-      disabledClass: "is-disabled"
+      navigation: {
+        nextEl: parent.find(".swiper-next")[0],
+        prevEl: parent.find(".swiper-prev")[0],
+        disabledClass: "is-disabled"
       }
     });
   });
