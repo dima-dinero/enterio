@@ -364,10 +364,10 @@
           centeredSlides: true 
         }
       },
-      navigation: {
-        nextEl: $(this).find(".swiper-next")[0],
-        prevEl: $(this).find(".swiper-prev")[0],
-        disabledClass: "is-disabled"
+    navigation: {
+      nextEl: $(this).parent().find(".swiper-next")[0],
+      prevEl: $(this).parent().find(".swiper-prev")[0],
+      disabledClass: "is-disabled"
       }
     });
   });
