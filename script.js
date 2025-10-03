@@ -323,6 +323,7 @@
           speed: 700,
           slidesPerView: 3,
           spaceBetween: 24,
+          grabCursor: true,
           pagination: {
             el: $(this).find(".swiper-progress").get(0),
             type: "progressbar",
