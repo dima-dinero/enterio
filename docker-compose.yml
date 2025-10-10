@@ -1,6 +1,7 @@
 services:
   flowise:
     image: flowiseai/flowise:latest
+    container_name: flowise
     restart: unless-stopped
     ports:
       - "${PORT}:3000"
@@ -12,6 +13,12 @@ services:
       - CORS_ORIGINS=${CORS_ORIGINS}
       - IFRAME_ORIGINS=${IFRAME_ORIGINS}
     volumes:
-      - flowise_data:/root/.flowise
-volumes:
-  flowise_data:
+      - /opt/enterio/flowise_data:/root/.flowise
+
+  watchtower:
+    image: containrrr/watchtower
+    container_name: watchtower
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --cleanup --interval 300
