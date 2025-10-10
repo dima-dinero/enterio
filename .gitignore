@@ -1,1 +1,5 @@
 .env
+
+flowise_data/
+*.sqlite
+*.key
