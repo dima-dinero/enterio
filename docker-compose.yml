@@ -1,0 +1,18 @@
+version: "3.8"
+services:
+  flowise:
+    image: flowiseai/flowise:latest
+    restart: unless-stopped
+    ports:
+      - "${PORT}:3000"
+    environment:
+      - PORT=${PORT}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - DATABASE_TYPE=${DATABASE_TYPE}
+      - DATABASE_PATH=${DATABASE_PATH}
+      - CORS_ORIGINS=${CORS_ORIGINS}
+      - IFRAME_ORIGINS=${IFRAME_ORIGINS}
+    volumes:
+      - flowise_data:/root/.flowise
+volumes:
+  flowise_data:
