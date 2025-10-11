@@ -16,11 +16,3 @@ services:
       - FLOWISE_PASSWORD=${FLOWISE_PASSWORD}
     volumes:
       - /opt/enterio/flowise_data:/root/.flowise
-
-  watchtower:
-    image: containrrr/watchtower
-    container_name: watchtower
-    restart: always
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    command: --cleanup --interval 300
