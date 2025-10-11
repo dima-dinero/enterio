@@ -16,7 +16,3 @@ services:
       - FLOWISE_PASSWORD=${FLOWISE_PASSWORD}
     volumes:
       - /opt/enterio/flowise_data:/root/.flowise
-    command: >
-      sh -c "mkdir -p /root/.flowise/db &&
-             chown -R root:root /root/.flowise &&
-             npm start"
