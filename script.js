@@ -33,62 +33,37 @@
     }
   };
 
-function initLenis() {
-  const lenis = new Lenis({
-    lerp: 0.12,
-    wheelMultiplier: 0.9,
-    infinite: false,
-    gestureOrientation: "vertical",
-    normalizeWheel: false,
-    smoothTouch: false
-  });
+  function initLenis() {
+    const lenis = new Lenis({
+      lerp: 0.12,
+      wheelMultiplier: 0.9,
+      infinite: false,
+      gestureOrientation: "vertical",
+      normalizeWheel: false,
+      smoothTouch: false
+    });
 
-  lenis.on('scroll', ScrollTrigger.update);
-  gsap.ticker.add(t => lenis.raf(t * 1000));
-  gsap.ticker.lagSmoothing(0);
+    lenis.on('scroll', ScrollTrigger.update);
+    gsap.ticker.add(t => lenis.raf(t * 1000));
+    gsap.ticker.lagSmoothing(0);
 
-  window.addEventListener('load', () => {
-    ScrollTrigger.refresh();
-    lenis.resize();
-  });
+    window.addEventListener('load', () => {
+      ScrollTrigger.refresh();
+      lenis.resize();
+    });
 
-  document.fonts?.ready.then(ScrollTrigger.refresh);
-  ScrollTrigger.addEventListener('refresh', () => lenis.resize());
+    document.fonts?.ready.then(ScrollTrigger.refresh);
+    ScrollTrigger.addEventListener('refresh', () => lenis.resize());
 
-  $("[data-lenis-start]").on("click", () => lenis.start());
-  $("[data-lenis-stop]").on("click", () => lenis.stop());
-  $("[data-lenis-toggle]").on("click", function () {
-    $(this).toggleClass("stop-scroll");
-    $(this).hasClass("stop-scroll") ? lenis.stop() : lenis.start();
-  });
+    $("[data-lenis-start]").on("click", () => lenis.start());
+    $("[data-lenis-stop]").on("click", () => lenis.stop());
+    $("[data-lenis-toggle]").on("click", function () {
+      $(this).toggleClass("stop-scroll");
+      $(this).hasClass("stop-scroll") ? lenis.stop() : lenis.start();
+    });
 
-  function disableLenisInFlowise() {
-    const chatbotEl = document.querySelector("flowise-chatbot");
-    if (!chatbotEl) return;
-
-    const shadow = chatbotEl.shadowRoot;
-    if (!shadow) {
-      requestAnimationFrame(disableLenisInFlowise);
-      return;
-    }
-
-    const scrollContainer = shadow.querySelector(".scrollable-container");
-    if (scrollContainer) {
-      scrollContainer.setAttribute("data-lenis-prevent", "");
-
-      scrollContainer.addEventListener("wheel", e => e.stopPropagation(), { passive: true });
-      scrollContainer.addEventListener("touchmove", e => e.stopPropagation(), { passive: true });
-
-    } else {
-      setTimeout(disableLenisInFlowise, 500);
-    }
+    return lenis;
   }
-
-  setTimeout(disableLenisInFlowise, 1000);
-
-  return lenis;
-}
-
   function initMenu() {
     const menu = document.querySelector(".menu");
     const toggleBtn = document.querySelector(".menu-toggle");
