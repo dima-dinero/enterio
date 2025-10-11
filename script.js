@@ -34,54 +34,36 @@
   };
 
   function initLenis() {
-  const lenis = new Lenis({
-    lerp: 0.12,
-    wheelMultiplier: 0.9,
-    infinite: false,
-    gestureOrientation: "vertical",
-    normalizeWheel: false,
-    smoothTouch: false
-  });
+    const lenis = new Lenis({
+      lerp: 0.12,
+      wheelMultiplier: 0.9,
+      infinite: false,
+      gestureOrientation: "vertical",
+      normalizeWheel: false,
+      smoothTouch: false
+    });
 
-  lenis.on('scroll', ScrollTrigger.update);
-  gsap.ticker.add(t => lenis.raf(t * 1000));
-  gsap.ticker.lagSmoothing(0);
+    lenis.on('scroll', ScrollTrigger.update);
+    gsap.ticker.add(t => lenis.raf(t * 1000));
+    gsap.ticker.lagSmoothing(0);
 
-  window.addEventListener('load', () => {
-    ScrollTrigger.refresh();
-    lenis.resize();
-  });
+    window.addEventListener('load', () => {
+      ScrollTrigger.refresh();
+      lenis.resize();
+    });
 
-  document.fonts?.ready.then(ScrollTrigger.refresh);
-  ScrollTrigger.addEventListener('refresh', () => lenis.resize());
+    document.fonts?.ready.then(ScrollTrigger.refresh);
+    ScrollTrigger.addEventListener('refresh', () => lenis.resize());
 
-  $("[data-lenis-start]").on("click", () => lenis.start());
-  $("[data-lenis-stop]").on("click", () => lenis.stop());
-  $("[data-lenis-toggle]").on("click", function () {
-    $(this).toggleClass("stop-scroll");
-    $(this).hasClass("stop-scroll") ? lenis.stop() : lenis.start();
-  });
+    $("[data-lenis-start]").on("click", () => lenis.start());
+    $("[data-lenis-stop]").on("click", () => lenis.stop());
+    $("[data-lenis-toggle]").on("click", function () {
+      $(this).toggleClass("stop-scroll");
+      $(this).hasClass("stop-scroll") ? lenis.stop() : lenis.start();
+    });
 
-  const chatSelector = '.chatbot-chat-view, .scrollable-container';
-  let chatEl = null;
-
-  const observer = new MutationObserver(() => {
-    if (!chatEl) {
-      chatEl = document.querySelector(chatSelector);
-      if (chatEl) {
-        chatEl.addEventListener('mouseenter', () => lenis.stop());
-        chatEl.addEventListener('mouseleave', () => lenis.start());
-
-        console.log('✅ Flowise чат изолирован от Lenis');
-      }
-    }
-  });
-
-  observer.observe(document.body, { childList: true, subtree: true });
-
-  return lenis;
-}
-
+    return lenis;
+  }
   function initMenu() {
     const menu = document.querySelector(".menu");
     const toggleBtn = document.querySelector(".menu-toggle");
