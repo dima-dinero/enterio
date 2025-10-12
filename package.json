@@ -1,0 +1,13 @@
+{
+  "name": "enterio",
+  "version": "1.0.0",
+  "description": "Enterio Scripts Project",
+  "main": "script.js",
+  "scripts": {
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "prettier": "^3.0.0"
+  }
+}
