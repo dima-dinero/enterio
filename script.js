@@ -99,17 +99,17 @@
       .to(menuLines[0], { y: moveY, rotate: 45, duration: 0.4 }, "<")
       .to(menuLines[1], { opacity: 0, duration: 0.4 }, "<")
       .to(menuLines[2], { y: -moveY, rotate: -45, duration: 0.4 }, "<")
-      .to(menuLinks, { y: 0, duration: 0.6, stagger: 0.05, }, "-=0.2")
+      .to(menuLinks, { y: 0, duration: 0.5, stagger: 0.04, }, "-=0.15")
       .to(menuBottomButtons, {
       scale: 1,
       opacity: 1,
-      duration: 0.8,
-      ease: "back.out(1.7)",
+      duration: 0.5,
+      ease: "power2.out",
       stagger: {
-        each: 0.05,
+        each: 0.04,
         from: "start"
       }
-    }, "-=0.3");
+    }, "-=0.2");
 
     toggleBtn.addEventListener("click", () => {
       if (menuTl.reversed()) {
@@ -134,6 +134,7 @@
       });
     }
   }
+  
   function initNavbar() {
     const navbar = document.querySelector(".navbar");
     const heroSection = document.querySelector(".section.is-hero");
