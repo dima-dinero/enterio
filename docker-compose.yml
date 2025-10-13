@@ -4,7 +4,7 @@ services:
     container_name: flowise
     restart: unless-stopped
     ports:
-      - "${PORT}:3000"
+      - '${PORT}:3000'
     environment:
       - PORT=${PORT}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
@@ -16,3 +16,16 @@ services:
       - FLOWISE_PASSWORD=${FLOWISE_PASSWORD}
     volumes:
       - /opt/enterio/flowise_data:/root/.flowise
+
+  telegram-bot:
+    build: ./telegram-bot
+    container_name: telegram-bot
+    restart: unless-stopped
+    depends_on:
+      - flowise
+    environment:
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - FLOWISE_URL=http://flowise:3000
+      - CHATFLOW_ID=${CHATFLOW_ID}
+    volumes:
+      - ./.env:/app/.env:ro
