@@ -56,6 +56,12 @@ bot.on('message', async (msg) => {
         overrideConfig: {
           sessionId: `telegram_${chatId}`,
         },
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          Origin: FLOWISE_URL,
+        },
       }
     );
 
