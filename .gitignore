@@ -3,3 +3,5 @@
 flowise_data/
 *.sqlite
 *.key
+
+.vscode/
