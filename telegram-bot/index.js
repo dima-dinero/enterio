@@ -48,6 +48,8 @@ bot.on('message', async (msg) => {
     `📩 Получено сообщение от ${msg.from.first_name}: ${userMessage}`
   );
 
+  await bot.sendChatAction(chatId, 'typing');
+
   try {
     const response = await axios.post(
       `${FLOWISE_URL}/api/v1/prediction/${CHATFLOW_ID}`,
