@@ -17,6 +17,8 @@ services:
       - WEBHOOK_URL=${WEBHOOK_URL}
     volumes:
       - /opt/enterio/flowise_data:/root/.flowise
+    networks:
+      - enterio-network
 
   telegram-bot:
     build:
@@ -32,6 +34,8 @@ services:
       - CHATFLOW_ID=${CHATFLOW_ID}
     volumes:
       - ./.env:/app/.env:ro
+    networks:
+      - enterio-network
 
   flowise-webhook:
     build:
@@ -48,3 +52,9 @@ services:
       - WEBHOOK_PORT=3001
     volumes:
       - ./.env:/app/.env:ro
+    networks:
+      - enterio-network
+
+networks:
+  enterio-network:
+    driver: bridge
