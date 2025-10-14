@@ -19,13 +19,7 @@ if (!CHATFLOW_ID) {
 
 const bot = new TelegramBot(TELEGRAM_TOKEN, { polling: true });
 
-console.log('✅ Telegram бот запущен!');
-console.log(`📡 Flowise URL: ${FLOWISE_URL}`);
-console.log(`🤖 Chatflow ID: ${CHATFLOW_ID}`);
-console.log(
-  `🔑 API Key: ${FLOWISE_API_KEY ? '✅ Установлен' : '❌ Не найден'}`
-);
-console.log('🔄 Бот готов принимать сообщения...');
+console.log('✅ Telegram bot started and ready');
 
 bot.onText(/\/start/, (msg) => {
   const chatId = msg.chat.id;
@@ -44,13 +38,10 @@ bot.on('message', async (msg) => {
 
   const chatId = msg.chat.id;
   const userMessage = msg.text;
-  const userName = msg.from.first_name || 'Пользователь';
 
   if (!userMessage) {
     return;
   }
-
-  console.log(`📩 Получено сообщение от ${userName}: ${userMessage}`);
 
   await bot.sendChatAction(chatId, 'typing');
 
@@ -78,21 +69,20 @@ bot.on('message', async (msg) => {
       response.data.answer ||
       'Извините, временно не могу вам ответить.';
 
-    console.log(`✅ Ответ отправлен: ${botReply.substring(0, 50)}...`);
     await bot.sendMessage(chatId, botReply);
   } catch (error) {
-    console.error('❌ Ошибка при обращении к Flowise:', error.message);
+    console.error('❌ Flowise API error:', error.message);
     if (error.response) {
-      console.error('📊 Статус:', error.response.status);
-      console.error('📊 Данные:', JSON.stringify(error.response.data, null, 2));
+      console.error('📊 Status:', error.response.status);
+      console.error('📊 Data:', JSON.stringify(error.response.data, null, 2));
     } else if (error.request) {
-      console.error('📡 Запрос был отправлен, но ответа не получено');
+      console.error('📡 Request sent but no response received');
       console.error(
         '🔍 URL:',
         `${FLOWISE_URL}/api/v1/prediction/${CHATFLOW_ID}`
       );
     } else {
-      console.error('⚠️ Ошибка настройки запроса:', error.message);
+      console.error('⚠️ Request setup error:', error.message);
     }
 
     await bot.sendMessage(
@@ -103,7 +93,5 @@ bot.on('message', async (msg) => {
 });
 
 bot.on('polling_error', (error) => {
-  console.error('❌ Ошибка polling:', error.message);
+  console.error('❌ Polling error:', error.message);
 });
-
-console.log('🔄 Бот готов принимать сообщения...');
