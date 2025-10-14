@@ -14,11 +14,14 @@ services:
       - IFRAME_ORIGINS=${IFRAME_ORIGINS}
       - FLOWISE_USERNAME=${FLOWISE_USERNAME}
       - FLOWISE_PASSWORD=${FLOWISE_PASSWORD}
+      - WEBHOOK_URL=${WEBHOOK_URL}
     volumes:
       - /opt/enterio/flowise_data:/root/.flowise
 
   telegram-bot:
-    build: ./telegram-bot
+    build:
+      context: .
+      dockerfile: telegram-bot/Dockerfile
     container_name: telegram-bot
     restart: unless-stopped
     depends_on:
@@ -27,5 +30,21 @@ services:
       - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
       - FLOWISE_URL=http://flowise:3000
       - CHATFLOW_ID=${CHATFLOW_ID}
+    volumes:
+      - ./.env:/app/.env:ro
+
+  flowise-webhook:
+    build:
+      context: .
+      dockerfile: flowise-webhook/Dockerfile
+    container_name: flowise-webhook
+    restart: unless-stopped
+    depends_on:
+      - flowise
+    ports:
+      - '${WEBHOOK_PORT:-3001}:3001'
+    environment:
+      - CLOUDFLARE_WORKER_URL=${CLOUDFLARE_WORKER_URL}
+      - WEBHOOK_PORT=3001
     volumes:
       - ./.env:/app/.env:ro
