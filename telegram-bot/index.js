@@ -7,20 +7,20 @@ const FLOWISE_URL = process.env.FLOWISE_URL;
 const CHATFLOW_ID = process.env.CHATFLOW_ID;
 
 if (!TELEGRAM_TOKEN) {
-  console.error('❌ Ошибка: TELEGRAM_BOT_TOKEN не найден в .env файле');
+  console.error('Error: TELEGRAM_BOT_TOKEN not found in .env file');
   process.exit(1);
 }
 
 if (!CHATFLOW_ID) {
-  console.error('❌ Ошибка: CHATFLOW_ID не найден в .env файле');
+  console.error('Error: CHATFLOW_ID not found in .env file');
   process.exit(1);
 }
 
 const bot = new TelegramBot(TELEGRAM_TOKEN, { polling: true });
 
-console.log('✅ Telegram бот запущен!');
-console.log(`📡 Flowise URL: ${FLOWISE_URL}`);
-console.log(`🤖 Chatflow ID: ${CHATFLOW_ID}`);
+console.log('Telegram bot started');
+console.log(`Flowise URL: ${FLOWISE_URL}`);
+console.log(`Chatflow ID: ${CHATFLOW_ID}`);
 
 bot.onText(/\/start/, (msg) => {
   const chatId = msg.chat.id;
@@ -43,10 +43,6 @@ bot.on('message', async (msg) => {
   if (!userMessage) {
     return;
   }
-
-  console.log(
-    `📩 Получено сообщение от ${msg.from.first_name}: ${userMessage}`
-  );
 
   await bot.sendChatAction(chatId, 'typing');
 
@@ -72,11 +68,9 @@ bot.on('message', async (msg) => {
       response.data.answer ||
       'Извините, временно не могу вам ответить.';
 
-    console.log(`✅ Ответ отправлен: ${botReply.substring(0, 50)}...`);
-
     await bot.sendMessage(chatId, botReply);
   } catch (error) {
-    console.error('❌ Ошибка при обращении к Flowise:', error.message);
+    console.error('Flowise request error:', error.message);
 
     await bot.sendMessage(
       chatId,
@@ -86,7 +80,7 @@ bot.on('message', async (msg) => {
 });
 
 bot.on('polling_error', (error) => {
-  console.error('❌ Ошибка polling:', error.message);
+  console.error('Polling error:', error.message);
 });
 
-console.log('🔄 Бот готов принимать сообщения...');
+console.log('Bot ready to receive messages');
