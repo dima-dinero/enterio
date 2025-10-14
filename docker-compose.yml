@@ -12,8 +12,6 @@ services:
       - DATABASE_PATH=${DATABASE_PATH}
       - CORS_ORIGINS=${CORS_ORIGINS}
       - IFRAME_ORIGINS=${IFRAME_ORIGINS}
-      - FLOWISE_USERNAME=${FLOWISE_USERNAME}
-      - FLOWISE_PASSWORD=${FLOWISE_PASSWORD}
       - WEBHOOK_URL=${WEBHOOK_URL}
     volumes:
       - /opt/enterio/flowise_data:/root/.flowise
