@@ -31,6 +31,7 @@ services:
     environment:
       - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
       - FLOWISE_URL=${FLOWISE_URL}
+      - FLOWISE_API_KEY=${FLOWISE_API_KEY}
       - CHATFLOW_ID=${CHATFLOW_ID}
     volumes:
       - ./.env:/app/.env:ro

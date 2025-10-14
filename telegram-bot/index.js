@@ -1,10 +1,11 @@
-require('dotenv').config({ path: '../.env' });
+require('dotenv').config({ path: '/app/.env' });
 const TelegramBot = require('node-telegram-bot-api');
 const axios = require('axios');
 
 const TELEGRAM_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const FLOWISE_URL = process.env.FLOWISE_URL;
 const CHATFLOW_ID = process.env.CHATFLOW_ID;
+const FLOWISE_API_KEY = process.env.FLOWISE_API_KEY;
 
 if (!TELEGRAM_TOKEN) {
   console.error('Error: TELEGRAM_BOT_TOKEN not found in .env file');
@@ -18,9 +19,13 @@ if (!CHATFLOW_ID) {
 
 const bot = new TelegramBot(TELEGRAM_TOKEN, { polling: true });
 
-console.log('Telegram bot started');
-console.log(`Flowise URL: ${FLOWISE_URL}`);
-console.log(`Chatflow ID: ${CHATFLOW_ID}`);
+console.log('✅ Telegram бот запущен!');
+console.log(`📡 Flowise URL: ${FLOWISE_URL}`);
+console.log(`🤖 Chatflow ID: ${CHATFLOW_ID}`);
+console.log(
+  `🔑 API Key: ${FLOWISE_API_KEY ? '✅ Установлен' : '❌ Не найден'}`
+);
+console.log('🔄 Бот готов принимать сообщения...');
 
 bot.onText(/\/start/, (msg) => {
   const chatId = msg.chat.id;
@@ -39,10 +44,13 @@ bot.on('message', async (msg) => {
 
   const chatId = msg.chat.id;
   const userMessage = msg.text;
+  const userName = msg.from.first_name || 'Пользователь';
 
   if (!userMessage) {
     return;
   }
+
+  console.log(`📩 Получено сообщение от ${userName}: ${userMessage}`);
 
   await bot.sendChatAction(chatId, 'typing');
 
@@ -58,6 +66,7 @@ bot.on('message', async (msg) => {
       {
         headers: {
           'Content-Type': 'application/json',
+          Authorization: `Bearer ${FLOWISE_API_KEY}`,
           Origin: FLOWISE_URL,
         },
       }
@@ -68,9 +77,22 @@ bot.on('message', async (msg) => {
       response.data.answer ||
       'Извините, временно не могу вам ответить.';
 
+    console.log(`✅ Ответ отправлен: ${botReply.substring(0, 50)}...`);
     await bot.sendMessage(chatId, botReply);
   } catch (error) {
-    console.error('Flowise request error:', error.message);
+    console.error('❌ Ошибка при обращении к Flowise:', error.message);
+    if (error.response) {
+      console.error('📊 Статус:', error.response.status);
+      console.error('📊 Данные:', JSON.stringify(error.response.data, null, 2));
+    } else if (error.request) {
+      console.error('📡 Запрос был отправлен, но ответа не получено');
+      console.error(
+        '🔍 URL:',
+        `${FLOWISE_URL}/api/v1/prediction/${CHATFLOW_ID}`
+      );
+    } else {
+      console.error('⚠️ Ошибка настройки запроса:', error.message);
+    }
 
     await bot.sendMessage(
       chatId,
@@ -80,7 +102,7 @@ bot.on('message', async (msg) => {
 });
 
 bot.on('polling_error', (error) => {
-  console.error('Polling error:', error.message);
+  console.error('❌ Ошибка polling:', error.message);
 });
 
-console.log('Bot ready to receive messages');
+console.log('🔄 Бот готов принимать сообщения...');
