@@ -4,8 +4,8 @@ WORKDIR /app
 
 COPY package*.json ./
 
+COPY telegram-bot/ ./telegram-bot/
+
 RUN npm install --production
 
-COPY . .
-
-CMD ["node", "index.js"]
+CMD ["node", "telegram-bot/index.js"]

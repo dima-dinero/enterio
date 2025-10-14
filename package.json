@@ -2,12 +2,27 @@
   "name": "enterio",
   "version": "1.0.0",
   "description": "Enterio Scripts Project",
-  "main": "script.js",
+  "private": true,
+  "workspaces": [
+    "telegram-bot",
+    "flowise-webhook"
+  ],
   "scripts": {
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "start:telegram": "node telegram-bot/index.js",
+    "start:webhook": "node flowise-webhook/server.js",
+    "dev:telegram": "nodemon telegram-bot/index.js",
+    "dev:webhook": "nodemon flowise-webhook/server.js"
+  },
+  "dependencies": {
+    "axios": "^1.7.0",
+    "dotenv": "^16.4.0",
+    "express": "^4.18.2",
+    "node-telegram-bot-api": "^0.66.0"
   },
   "devDependencies": {
-    "prettier": "^3.0.0"
+    "prettier": "^3.0.0",
+    "nodemon": "^3.0.1"
   }
 }
