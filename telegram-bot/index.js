@@ -83,4 +83,4 @@ bot.on('polling_error', (error) => {
   console.error('Polling error:', error.message);
 });
 
-console.log('Bot ready to receive messages');
+console.log('Bot ready to receive messages!');
