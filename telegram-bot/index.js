@@ -66,8 +66,9 @@ bot.on('message', async (msg) => {
       {
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${FLOWISE_API_KEY}`,
-          Origin: FLOWISE_URL,
+          ...(FLOWISE_API_KEY && {
+            Authorization: `Bearer ${FLOWISE_API_KEY}`,
+          }),
         },
       }
     );
