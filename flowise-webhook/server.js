@@ -14,45 +14,41 @@ app.use((req, res, next) => {
 
 app.post('/webhook/contacts', async (req, res) => {
   try {
-    console.log('📩 Получены данные от Flowise:', req.body);
-
-    const { name, phone } = req.body;
+    const { name, phone, summary } = req.body;
 
     if (!name || !phone) {
-      console.error('❌ Ошибка: отсутствуют обязательные поля');
+      console.error('Missing required fields: name or phone');
       return res.status(400).json({
         success: false,
-        error: 'Поля name и phone обязательны',
+        error: 'Fields name and phone are required',
       });
     }
 
     const workerData = {
       name: name.trim(),
-      phone: phone.trim(),
+      phone: phone.toString().trim(),
       form_name: 'AI Chat',
-      comment: 'Заявка из чата с AI-ассистентом Flowise',
+      comment: summary || 'Request from AI chat assistant',
     };
-
-    console.log('📤 Отправка данных в Cloudflare Worker...');
 
     const workerUrl = process.env.CLOUDFLARE_WORKER_URL;
 
     if (!workerUrl) {
-      throw new Error('CLOUDFLARE_WORKER_URL не настроен в .env');
+      throw new Error('CLOUDFLARE_WORKER_URL is not configured');
     }
 
     const workerResponse = await axios.post(workerUrl, workerData, {
       headers: {
         'Content-Type': 'application/json',
       },
-      timeout: 10000, // 10 секунд
+      timeout: 10000,
     });
 
-    console.log('✅ Данные успешно отправлены в Worker:', workerResponse.data);
+    console.log('Lead created:', workerResponse.data?.bitrix?.result);
 
     res.json({
       success: true,
-      message: 'Контакты успешно обработаны',
+      message: 'Contact processed successfully',
       data: {
         name,
         phone,
@@ -60,16 +56,15 @@ app.post('/webhook/contacts', async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('❌ Ошибка при обработке запроса:', error.message);
+    console.error('Request processing error:', error.message);
 
     if (error.response) {
-      console.error('Ответ от Worker:', error.response.data);
-      console.error('Статус:', error.response.status);
+      console.error('Worker response:', error.response.data);
     }
 
     res.status(500).json({
       success: false,
-      error: 'Ошибка при обработке контактов',
+      error: 'Error processing contact',
       details: error.message,
     });
   }
@@ -84,7 +79,7 @@ app.get('/health', (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`🚀 Flowise Webhook сервер запущен на порту ${PORT}`);
-  console.log(`📍 Webhook URL: http://localhost:${PORT}/webhook/contacts`);
-  console.log(`🏥 Health check: http://localhost:${PORT}/health`);
+  console.log(`Flowise webhook server running on port ${PORT}`);
+  console.log(`Webhook URL: http://localhost:${PORT}/webhook/contacts`);
+  console.log(`Health check: http://localhost:${PORT}/health`);
 });
