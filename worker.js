@@ -6,7 +6,7 @@ export default {
 
     const url = new URL(request.url);
     const parts = url.pathname.split('/').filter(Boolean);
-    const expected = env.WEBFLOW_HOOK_SECRET;
+    const expected = env.HOOK_SECRET;
     const okRoute = parts.length >= 2 && parts[parts.length - 2] === 'hook';
     const lastSeg = parts[parts.length - 1];
 
@@ -46,16 +46,33 @@ export default {
       const activity = t(wfData.activity);
 
       // --- Комментарий ---
-      let comments = comment;
-      if (companyName) comments += `\nКомпания: ${companyName}`;
-      if (activity) comments += `\nСфера деятельности: ${activity}`;
-      if (date) comments += `\nДата для связи: ${date}`;
-      if (time) comments += `\nВремя для связи: ${time}`;
+      let comments = '';
+
+      // Добавляем префикс для summary из чатбота
+      if (formName.toLowerCase() === 'ai chat' && comment) {
+        if (comment !== 'Заявка из чата с AI-ассистентом Flowise') {
+          comments = `📝 Контекст переписки:\n${comment}`;
+        } else {
+          comments = comment;
+        }
+      } else if (comment) {
+        comments = comment;
+      }
+
+      if (companyName)
+        comments += `${comments ? '\n' : ''}Компания: ${companyName}`;
+      if (activity)
+        comments += `${comments ? '\n' : ''}Сфера деятельности: ${activity}`;
+      if (date) comments += `${comments ? '\n' : ''}Дата для связи: ${date}`;
+      if (time) comments += `${comments ? '\n' : ''}Время для связи: ${time}`;
 
       // --- Заголовок ---
       let title = `Новая заявка с сайта ${formName}`;
       let assignedId = 464;
       switch (formName.toLowerCase()) {
+        case 'ai chat':
+          title = 'Новая заявка с бота Enterio AI';
+          break;
         case 'callback':
           title = 'Заявка на обратный звонок';
           break;
@@ -102,6 +119,33 @@ export default {
         body: JSON.stringify(payload),
       });
       const bitrixResult = await bitrixResp.json().catch(() => ({}));
+
+      if (bitrixResp.ok && bitrixResult?.result && comments) {
+        const leadId = bitrixResult.result;
+
+        const timelinePayload = {
+          fields: {
+            ENTITY_ID: leadId,
+            ENTITY_TYPE: 'lead',
+            COMMENT: comments,
+          },
+        };
+
+        const timelineResp = await fetch(
+          `${base}/crm.timeline.comment.add.json`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(timelinePayload),
+          }
+        );
+
+        const timelineResult = await timelineResp.json().catch(() => ({}));
+
+        if (!timelineResp.ok) {
+          console.error('Timeline comment error:', timelineResult);
+        }
+      }
 
       // --- Создание дела, если есть дата и время ---
       if (bitrixResp.ok && bitrixResult?.result && date && time) {
@@ -239,7 +283,7 @@ export default {
         }
       );
     } catch (e) {
-      console.error('Ошибка в воркере:', e);
+      console.error('Worker error:', e?.message || e);
       return new Response(`Error: ${e?.message || e}`, { status: 500 });
     }
   },
