@@ -5,3 +5,5 @@ flowise_data/
 *.key
 
 .vscode/
+
+.cloudflare/
