@@ -6,4 +6,6 @@ flowise_data/
 
 .vscode/
 
-.cloudflare/
+cloudflare/
+
+chatflows/
