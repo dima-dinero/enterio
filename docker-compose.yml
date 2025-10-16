@@ -14,7 +14,21 @@ services:
       - IFRAME_ORIGINS=${IFRAME_ORIGINS}
       - WEBHOOK_URL=${WEBHOOK_URL}
     volumes:
-      - /opt/enterio/flowise_data:/root/.flowise
+      - flowise-data:/root/.flowise
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'wget',
+          '--no-verbose',
+          '--tries=1',
+          '--spider',
+          'http://localhost:3000/api/v1/health',
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
     networks:
       - enterio-network
 
@@ -25,14 +39,19 @@ services:
     container_name: telegram-bot
     restart: unless-stopped
     depends_on:
-      - flowise
+      flowise:
+        condition: service_healthy
     environment:
       - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
       - FLOWISE_URL=${FLOWISE_URL}
       - FLOWISE_API_KEY=${FLOWISE_API_KEY}
       - CHATFLOW_ID=${CHATFLOW_ID}
-    volumes:
-      - ./.env:/app/.env:ro
+    healthcheck:
+      test: ['CMD', 'node', '-e', 'process.exit(0)']
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
     networks:
       - enterio-network
 
@@ -43,16 +62,33 @@ services:
     container_name: flowise-webhook
     restart: unless-stopped
     depends_on:
-      - flowise
+      flowise:
+        condition: service_healthy
     ports:
       - '${WEBHOOK_PORT:-3001}:3001'
     environment:
       - CLOUDFLARE_WORKER_URL=${CLOUDFLARE_WORKER_URL}
       - WEBHOOK_PORT=3001
-    volumes:
-      - ./.env:/app/.env:ro
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'wget',
+          '--no-verbose',
+          '--tries=1',
+          '--spider',
+          'http://localhost:3001/health',
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
     networks:
       - enterio-network
+
+volumes:
+  flowise-data:
+    driver: local
 
 networks:
   enterio-network:
