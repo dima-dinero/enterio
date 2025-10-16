@@ -74,4 +74,4 @@ async function sendContacts(contacts, summary) {
   }
 }
 
-return await sendContacts($contacts, $summary);
+await sendContacts($contacts, $summary);
