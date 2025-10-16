@@ -1,3 +1,20 @@
+const axios = require('axios');
+
+function validateRussianPhone(phone) {
+  const phoneStr = `${phone}`.replace(/\D/g, '');
+
+  const normalizedPhone =
+    phoneStr.startsWith('8') && phoneStr.length === 11
+      ? '7' + phoneStr.slice(1)
+      : phoneStr;
+
+  if (!/^7\d{10}$/.test(normalizedPhone)) {
+    return { valid: false, error: 'Invalid Russian phone format' };
+  }
+
+  return { valid: true, formatted: `+${normalizedPhone}` };
+}
+
 async function sendContacts(contacts, summary) {
   try {
     const webhookUrl = 'http://flowise-webhook:3001/webhook/contacts';
@@ -7,7 +24,6 @@ async function sendContacts(contacts, summary) {
       try {
         contactData = JSON.parse(contacts);
       } catch (e) {
-        console.error('Contact parsing error:', e);
         return {
           success: false,
           error: 'Invalid contact data format',
@@ -19,20 +35,25 @@ async function sendContacts(contacts, summary) {
     const phone = contactData.phone || contactData.Phone || '';
 
     if (!name || !phone) {
-      console.error('Missing required fields: name or phone');
       return {
         success: false,
         error: 'Name or phone not found in contacts',
       };
     }
 
+    const phoneValidation = validateRussianPhone(phone);
+    if (!phoneValidation.valid) {
+      return {
+        success: false,
+        error: `Invalid phone number: ${phoneValidation.error}`,
+      };
+    }
+
     const payload = {
       name: name.trim(),
-      phone: phone.toString().trim(),
+      phone: phoneValidation.formatted,
       summary: summary || 'No conversation data',
     };
-
-    const axios = require('axios');
 
     const response = await axios.post(webhookUrl, payload, {
       headers: {
@@ -41,15 +62,11 @@ async function sendContacts(contacts, summary) {
       timeout: 10000,
     });
 
-    const result = response.data;
-
     return {
       success: true,
-      message: 'Contacts successfully processed',
-      data: result,
+      message: 'Contact successfully sent to processing',
     };
   } catch (error) {
-    console.error('Critical error sending contacts:', error);
     return {
       success: false,
       error: error.message || 'Unknown error',
