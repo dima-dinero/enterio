@@ -2,22 +2,51 @@ const express = require('express');
 const axios = require('axios');
 require('dotenv').config();
 
+if (!process.env.CLOUDFLARE_WORKER_URL) {
+  console.error(
+    '❌ Error: CLOUDFLARE_WORKER_URL not found in environment variables'
+  );
+  process.exit(1);
+}
+
 const app = express();
 const PORT = process.env.WEBHOOK_PORT || 3001;
+const CLOUDFLARE_WORKER_URL = process.env.CLOUDFLARE_WORKER_URL;
+
+const requestTimestamps = new Map();
+const RATE_LIMIT_WINDOW = 60000; // 1 minute
+const MAX_REQUESTS_PER_WINDOW = 10;
 
 app.use(express.json());
 
 app.use((req, res, next) => {
-  console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
+  console.log(`${req.method} ${req.path}`);
   next();
 });
 
 app.post('/webhook/contacts', async (req, res) => {
   try {
+    const clientId = req.ip || 'unknown';
+    const now = Date.now();
+    const timestamps = requestTimestamps.get(clientId) || [];
+    const recentRequests = timestamps.filter(
+      (t) => now - t < RATE_LIMIT_WINDOW
+    );
+
+    if (recentRequests.length >= MAX_REQUESTS_PER_WINDOW) {
+      console.warn(`Rate limit exceeded for ${clientId}`);
+      return res.status(429).json({
+        success: false,
+        error: 'Too many requests. Please try again later.',
+      });
+    }
+
+    recentRequests.push(now);
+    requestTimestamps.set(clientId, recentRequests);
+
     const { name, phone, summary } = req.body;
 
     if (!name || !phone) {
-      console.error('Missing required fields: name or phone');
       return res.status(400).json({
         success: false,
         error: 'Fields name and phone are required',
@@ -31,36 +60,19 @@ app.post('/webhook/contacts', async (req, res) => {
       comment: summary || 'Request from AI chat assistant',
     };
 
-    const workerUrl = process.env.CLOUDFLARE_WORKER_URL;
-
-    if (!workerUrl) {
-      throw new Error('CLOUDFLARE_WORKER_URL is not configured');
-    }
-
-    const workerResponse = await axios.post(workerUrl, workerData, {
+    const workerResponse = await axios.post(CLOUDFLARE_WORKER_URL, workerData, {
       headers: {
         'Content-Type': 'application/json',
       },
       timeout: 10000,
     });
 
-    console.log('Lead created:', workerResponse.data?.bitrix?.result);
-
     res.json({
       success: true,
       message: 'Contact processed successfully',
-      data: {
-        name,
-        phone,
-        workerResponse: workerResponse.data,
-      },
     });
   } catch (error) {
-    console.error('Request processing error:', error.message);
-
-    if (error.response) {
-      console.error('Worker response:', error.response.data);
-    }
+    console.error('Error processing contact:', error.message);
 
     res.status(500).json({
       success: false,
