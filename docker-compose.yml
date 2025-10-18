@@ -67,6 +67,29 @@ services:
     networks:
       - enterio-network
 
+  whatsapp-bot:
+    build:
+      context: .
+      dockerfile: whatsapp-bot/Dockerfile
+    container_name: whatsapp-bot
+    restart: unless-stopped
+    depends_on:
+      - flowise
+    ports:
+      - '${WHATSAPP_PORT:-3002}:3002'
+    environment:
+      - WAZZUP_API_KEY=${WAZZUP_API_KEY}
+      - WAZZUP_CHANNEL_ID=${WAZZUP_CHANNEL_ID}
+      - FLOWISE_URL=${FLOWISE_URL}
+      - FLOWISE_API_KEY=${FLOWISE_API_KEY}
+      - CHATFLOW_ID=${CHATFLOW_ID}
+      - WHATSAPP_PORT=${WHATSAPP_PORT:-3002}
+      - WEBHOOK_BASE_URL=${WEBHOOK_BASE_URL}
+    volumes:
+      - ./.env:/app/.env:ro
+    networks:
+      - enterio-network
+
 networks:
   enterio-network:
     driver: bridge

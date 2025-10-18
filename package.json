@@ -5,15 +5,18 @@
   "private": true,
   "workspaces": [
     "telegram-bot",
-    "flowise-webhook"
+    "flowise-webhook",
+    "whatsapp-bot"
   ],
   "scripts": {
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "start:telegram": "node telegram-bot/index.js",
     "start:webhook": "node flowise-webhook/server.js",
+    "start:whatsapp": "node whatsapp-bot/index.js",
     "dev:telegram": "nodemon telegram-bot/index.js",
-    "dev:webhook": "nodemon flowise-webhook/server.js"
+    "dev:webhook": "nodemon flowise-webhook/server.js",
+    "dev:whatsapp": "nodemon whatsapp-bot/index.js"
   },
   "dependencies": {
     "axios": "^1.7.0",
