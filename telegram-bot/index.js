@@ -88,11 +88,12 @@ bot.on('message', async (msg) => {
       },
       {
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json; charset=utf-8',
           ...(FLOWISE_API_KEY && {
             Authorization: `Bearer ${FLOWISE_API_KEY}`,
           }),
         },
+        responseEncoding: 'utf8',
       }
     );
 
