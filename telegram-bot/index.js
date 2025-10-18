@@ -24,6 +24,11 @@ const userLastMessage = new Map();
 const RATE_LIMIT_MS = 3000;
 const MAX_MESSAGE_LENGTH = 2000;
 
+function sanitizeText(text) {
+  if (!text) return text;
+  return Buffer.from(text, 'utf8').toString('utf8');
+}
+
 const bot = new TelegramBot(TELEGRAM_TOKEN, { polling: true });
 
 console.log('✅ Telegram bot started and ready');
@@ -78,10 +83,12 @@ bot.on('message', async (msg) => {
   await bot.sendChatAction(chatId, 'typing');
 
   try {
+    const sanitizedMessage = sanitizeText(userMessage);
+
     const response = await axios.post(
       `${FLOWISE_URL}/api/v1/prediction/${CHATFLOW_ID}`,
       {
-        question: userMessage,
+        question: sanitizedMessage,
         overrideConfig: {
           sessionId: `telegram_${chatId}`,
         },

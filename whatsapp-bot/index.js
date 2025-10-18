@@ -32,6 +32,11 @@ app.use(express.json());
 const userLastMessage = new Map();
 const RATE_LIMIT_MS = 3000;
 
+function sanitizeText(text) {
+  if (!text) return text;
+  return Buffer.from(text, 'utf8').toString('utf8');
+}
+
 async function sendWhatsAppMessage(chatId, text) {
   try {
     const response = await axios.post(
@@ -63,21 +68,24 @@ async function sendWhatsAppMessage(chatId, text) {
 
 async function getFlowiseResponse(userMessage, sessionId) {
   try {
+    const sanitizedMessage = sanitizeText(userMessage);
+
     const response = await axios.post(
       `${FLOWISE_URL}/api/v1/prediction/${CHATFLOW_ID}`,
       {
-        question: userMessage,
+        question: sanitizedMessage,
         overrideConfig: {
           sessionId: sessionId,
         },
       },
       {
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json; charset=utf-8',
           ...(FLOWISE_API_KEY && {
             Authorization: `Bearer ${FLOWISE_API_KEY}`,
           }),
         },
+        responseEncoding: 'utf8',
       }
     );
 
