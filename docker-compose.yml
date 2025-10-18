@@ -25,6 +25,9 @@ services:
       - CORS_ORIGINS=${CORS_ORIGINS}
       - IFRAME_ORIGINS=${IFRAME_ORIGINS}
       - WEBHOOK_URL=${WEBHOOK_URL}
+      - TRUST_PROXY=true
+      - RATE_LIMIT_TRUST_PROXY=true
+      - NUMBER_OF_PROXIES=1
     volumes:
       - /opt/enterio/flowise_data:/root/.flowise
     networks:

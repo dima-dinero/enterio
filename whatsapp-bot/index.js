@@ -117,7 +117,6 @@ app.post('/webhook', async (req, res) => {
     }
 
     for (const message of messages) {
-      // Wazzup24 помечает исходящие сообщения (от бота) как isEcho: true
       if (message.isEcho === true) {
         console.log('⏭️ Skipping echo message (sent by bot)');
         continue;
