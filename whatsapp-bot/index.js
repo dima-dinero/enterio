@@ -101,10 +101,7 @@ async function getFlowiseResponse(userMessage, sessionId) {
 }
 
 app.post('/webhook', async (req, res) => {
-  console.log('📩 Webhook received:', JSON.stringify(req.body, null, 2));
-
   if (req.body.test === true) {
-    console.log('✅ Test webhook received');
     return res.status(200).json({ status: 'ok' });
   }
 
@@ -112,13 +109,11 @@ app.post('/webhook', async (req, res) => {
     const messages = req.body.messages;
 
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
-      console.log('⚠️ No messages in webhook');
       return res.status(200).json({ status: 'ok' });
     }
 
     for (const message of messages) {
       if (message.isEcho === true) {
-        console.log('⏭️ Skipping echo message (sent by bot)');
         continue;
       }
 
@@ -126,17 +121,13 @@ app.post('/webhook', async (req, res) => {
       const userMessage = message.text;
 
       if (!userMessage || !chatId) {
-        console.log('⚠️ Message has no text or chatId');
         continue;
       }
-
-      console.log(`📨 Incoming message from ${chatId}: ${userMessage}`);
 
       const now = Date.now();
       const lastMessageTime = userLastMessage.get(chatId) || 0;
 
       if (now - lastMessageTime < RATE_LIMIT_MS) {
-        console.log(`⏸️ Rate limit for ${chatId}, skipping`);
         continue;
       }
 
@@ -147,7 +138,6 @@ app.post('/webhook', async (req, res) => {
           userMessage,
           `whatsapp_${chatId}`
         );
-        console.log(`🤖 AI response: ${aiResponse}`);
 
         await sendWhatsAppMessage(chatId, aiResponse);
       } catch (error) {
@@ -172,8 +162,6 @@ app.get('/health', (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`✅ WhatsApp bot server running on port ${PORT}`);
-  console.log(`📍 Webhook URL: http://localhost:${PORT}/webhook`);
-  console.log(`🔗 Channel ID: ${WAZZUP_CHANNEL_ID}`);
 });
 
 process.on('SIGTERM', () => {
