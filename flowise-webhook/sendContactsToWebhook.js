@@ -15,6 +15,16 @@ function validateRussianPhone(phone) {
   return { valid: true, formatted: `+${normalizedPhone}` };
 }
 
+function getSourceFromSessionId(sessionId) {
+  if (!sessionId) return 'Веб-сайт';
+
+  if (sessionId.startsWith('whatsapp_')) return 'WhatsApp';
+  if (sessionId.startsWith('telegram_')) return 'Telegram';
+  if (sessionId.startsWith('website_')) return 'Веб-сайт';
+
+  return 'Веб-сайт';
+}
+
 async function sendContacts(contacts, summary) {
   try {
     const webhookUrl = 'http://flowise-webhook:3001/webhook/contacts';
@@ -24,6 +34,7 @@ async function sendContacts(contacts, summary) {
       try {
         contactData = JSON.parse(contacts);
       } catch (e) {
+        console.error('JSON parse error:', e.message);
         return {
           success: false,
           error: 'Invalid contact data format',
@@ -49,10 +60,14 @@ async function sendContacts(contacts, summary) {
       };
     }
 
+    const sessionId = $flow.sessionId || '';
+    const source = getSourceFromSessionId(sessionId);
+
     const payload = {
       name: name.trim(),
       phone: phoneValidation.formatted,
       summary: summary || 'No conversation data',
+      source: source,
     };
 
     const response = await axios.post(webhookUrl, payload, {
@@ -67,6 +82,7 @@ async function sendContacts(contacts, summary) {
       message: 'Contact successfully sent to processing',
     };
   } catch (error) {
+    console.error('Error sending contacts:', error.message);
     return {
       success: false,
       error: error.message || 'Unknown error',
@@ -74,4 +90,5 @@ async function sendContacts(contacts, summary) {
   }
 }
 
-await sendContacts($contacts, $summary);
+const result = await sendContacts($contacts, $summary);
+return JSON.stringify(result);
