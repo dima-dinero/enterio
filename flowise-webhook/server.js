@@ -44,7 +44,7 @@ app.post('/webhook/contacts', async (req, res) => {
     recentRequests.push(now);
     requestTimestamps.set(clientId, recentRequests);
 
-    const { name, phone, summary } = req.body;
+    const { name, phone, summary, source } = req.body;
 
     if (!name || !phone) {
       return res.status(400).json({
@@ -58,6 +58,7 @@ app.post('/webhook/contacts', async (req, res) => {
       phone: phone.toString().trim(),
       form_name: 'AI Chat',
       comment: summary || 'Request from AI chat assistant',
+      source: source || 'Веб-сайт',
     };
 
     const workerResponse = await axios.post(CLOUDFLARE_WORKER_URL, workerData, {
