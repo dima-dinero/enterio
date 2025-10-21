@@ -70,6 +70,14 @@ async function getFlowiseResponse(userMessage, sessionId) {
   try {
     const sanitizedMessage = sanitizeText(userMessage);
 
+    console.log('🔄 Sending to Flowise:', {
+      sessionId,
+      originalMessage: userMessage,
+      sanitizedMessage: sanitizedMessage,
+      messageLength: sanitizedMessage?.length,
+      encoding: Buffer.from(sanitizedMessage || '').toString('hex').substring(0, 100)
+    });
+
     const response = await axios.post(
       `${FLOWISE_URL}/api/v1/prediction/${CHATFLOW_ID}`,
       {
@@ -89,38 +97,65 @@ async function getFlowiseResponse(userMessage, sessionId) {
       }
     );
 
+    console.log('✅ Flowise response received:', {
+      sessionId,
+      responseData: JSON.stringify(response.data, null, 2),
+      hasText: !!response.data.text,
+      hasAnswer: !!response.data.answer
+    });
+
     return (
       response.data.text ||
       response.data.answer ||
       'Извините, не могу ответить.'
     );
   } catch (error) {
-    console.error('❌ Flowise API error:', error.message);
+    console.error('❌ Flowise API error:', {
+      message: error.message,
+      response: error.response?.data,
+      status: error.response?.status,
+      sessionId
+    });
     throw error;
   }
 }
 
 app.post('/webhook', async (req, res) => {
   if (req.body.test === true) {
+    console.log('✅ Test webhook received');
     return res.status(200).json({ status: 'ok' });
   }
 
   try {
+    console.log('📥 Webhook received:', JSON.stringify(req.body, null, 2));
+
     const messages = req.body.messages;
 
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
+      console.log('⚠️ No messages in webhook body');
       return res.status(200).json({ status: 'ok' });
     }
 
+    console.log(`📨 Processing ${messages.length} message(s)`);
+
     for (const message of messages) {
       if (message.isEcho === true) {
+        console.log('🔁 Skipping echo message');
         continue;
       }
 
       const chatId = message.chatId;
       const userMessage = message.text;
 
+      console.log(`📧 Message from ${chatId}:`, {
+        text: userMessage,
+        textLength: userMessage?.length,
+        textEncoding: userMessage ? Buffer.from(userMessage).toString('hex').substring(0, 100) : 'null',
+        rawMessage: JSON.stringify(message)
+      });
+
       if (!userMessage || !chatId) {
+        console.log('⚠️ Missing userMessage or chatId, skipping');
         continue;
       }
 
@@ -128,20 +163,28 @@ app.post('/webhook', async (req, res) => {
       const lastMessageTime = userLastMessage.get(chatId) || 0;
 
       if (now - lastMessageTime < RATE_LIMIT_MS) {
+        console.log(`⏱️ Rate limit: skipping message from ${chatId}`);
         continue;
       }
 
       userLastMessage.set(chatId, now);
 
       try {
+        console.log(`🚀 Processing message for ${chatId}`);
         const aiResponse = await getFlowiseResponse(
           userMessage,
           `whatsapp_${chatId}`
         );
 
+        console.log(`📤 Sending response to ${chatId}:`, aiResponse.substring(0, 100));
         await sendWhatsAppMessage(chatId, aiResponse);
+        console.log(`✅ Message sent successfully to ${chatId}`);
       } catch (error) {
-        console.error('❌ Error processing message:', error.message);
+        console.error('❌ Error processing message:', {
+          chatId,
+          error: error.message,
+          stack: error.stack
+        });
         await sendWhatsAppMessage(
           chatId,
           '😔 Извините, произошла ошибка. Попробуйте позже или свяжитесь с нами напрямую.'
