@@ -714,15 +714,12 @@ function initForms() {
         // Токен, созданный Turnstile автоматически (внутри виджета)
         const autoToken = turnstileWidget.querySelector('input[name="cf-turnstile-response"]');
 
-        // Находим все поля с именем cf-turnstile-response
-        const allTokens = form.querySelectorAll('input[name="cf-turnstile-response"]');
-
-        // Берем то поле, которое НЕ внутри виджета (наше скрытое поле)
-        const manualToken = Array.from(allTokens).find(input => !turnstileWidget.contains(input));
+        // Наше скрытое поле с другим именем
+        const manualToken = form.querySelector('input[name="turnstile_token"]');
 
         if (autoToken && autoToken.value && manualToken) {
           manualToken.value = autoToken.value;
-          console.log('[Turnstile] Token copied from widget to form field, length:', autoToken.value.length);
+          console.log('[Turnstile] Token copied to turnstile_token field, length:', autoToken.value.length);
         } else {
           console.warn('[Turnstile] Could not copy token - autoToken:', !!autoToken, 'value:', !!autoToken?.value, 'manualToken:', !!manualToken);
         }
@@ -732,18 +729,12 @@ function initForms() {
     if (trueSubmit && phoneInput && buttonText && arrowWrapper) {
       fakeButton.addEventListener('click', function () {
         // Проверка Turnstile токена (временно только логирование)
-        const turnstileResponse = form.querySelector(
-          'input[name="cf-turnstile-response"]'
-        );
+        const turnstileResponse = form.querySelector('input[name="turnstile_token"]');
         if (!turnstileResponse || !turnstileResponse.value) {
           console.warn('[Turnstile] Token not found on frontend - form will still submit');
           // Временно не блокируем отправку
-          // alert(
-          //   'Пожалуйста, пройдите проверку безопасности. Попробуйте обновить страницу.'
-          // );
-          // return;
         } else {
-          console.log('[Turnstile] Token found on frontend, length:', turnstileResponse.value.length);
+          console.log('[Turnstile] Token found in turnstile_token field, length:', turnstileResponse.value.length);
         }
 
         const phoneValue = phoneInput.value.trim();
