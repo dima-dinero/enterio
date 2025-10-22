@@ -709,6 +709,14 @@ function initForms() {
 
     if (trueSubmit && phoneInput && buttonText && arrowWrapper) {
       fakeButton.addEventListener('click', function () {
+        const turnstileToken = form.querySelector(
+          'input[name="turnstile_token"]'
+        );
+        if (!turnstileToken || !turnstileToken.value) {
+          alert('Пожалуйста, пройдите проверку безопасности.');
+          return;
+        }
+
         const phoneValue = phoneInput.value.trim();
         const isPhoneComplete = /^\+7 \(\d{3}\) \d{3}-\d{2}-\d{2}$/.test(
           phoneValue
