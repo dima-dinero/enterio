@@ -707,36 +707,8 @@ function initForms() {
 
     if (loader) loader.style.display = 'none';
 
-    // Копируем токен Turnstile перед отправкой формы
-    function copyTurnstileToken() {
-      const turnstileWidget = form.querySelector('.cf-turnstile');
-      if (turnstileWidget) {
-        // Токен, созданный Turnstile автоматически (внутри виджета)
-        const autoToken = turnstileWidget.querySelector('input[name="cf-turnstile-response"]');
-
-        // Наше скрытое поле с другим именем
-        const manualToken = form.querySelector('input[name="turnstile_token"]');
-
-        if (autoToken && autoToken.value && manualToken) {
-          manualToken.value = autoToken.value;
-          console.log('[Turnstile] Token copied to turnstile_token field, length:', autoToken.value.length);
-        } else {
-          console.warn('[Turnstile] Could not copy token - autoToken:', !!autoToken, 'value:', !!autoToken?.value, 'manualToken:', !!manualToken);
-        }
-      }
-    }
-
     if (trueSubmit && phoneInput && buttonText && arrowWrapper) {
       fakeButton.addEventListener('click', function () {
-        // Проверка Turnstile токена (временно только логирование)
-        const turnstileResponse = form.querySelector('input[name="turnstile_token"]');
-        if (!turnstileResponse || !turnstileResponse.value) {
-          console.warn('[Turnstile] Token not found on frontend - form will still submit');
-          // Временно не блокируем отправку
-        } else {
-          console.log('[Turnstile] Token found in turnstile_token field, length:', turnstileResponse.value.length);
-        }
-
         const phoneValue = phoneInput.value.trim();
         const isPhoneComplete = /^\+7 \(\d{3}\) \d{3}-\d{2}-\d{2}$/.test(
           phoneValue
@@ -751,16 +723,6 @@ function initForms() {
         }
 
         phoneInput.setCustomValidity('');
-
-        // Копируем токен Turnstile из виджета в скрытое поле формы
-        copyTurnstileToken();
-
-        // Логируем все поля формы перед отправкой
-        const formData = new FormData(form);
-        console.log('[Debug] Form fields before submit:');
-        for (let [key, value] of formData.entries()) {
-          console.log(`  ${key}:`, value);
-        }
 
         fakeButton.style.pointerEvents = 'none';
         buttonText.textContent = 'Подождите';
