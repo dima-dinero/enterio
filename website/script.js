@@ -709,14 +709,6 @@ function initForms() {
 
     if (trueSubmit && phoneInput && buttonText && arrowWrapper) {
       fakeButton.addEventListener('click', function () {
-        const turnstileToken = form.querySelector(
-          'input[name="turnstile_token"]'
-        );
-        if (!turnstileToken || !turnstileToken.value) {
-          alert('Пожалуйста, пройдите проверку безопасности.');
-          return;
-        }
-
         const phoneValue = phoneInput.value.trim();
         const isPhoneComplete = /^\+7 \(\d{3}\) \d{3}-\d{2}-\d{2}$/.test(
           phoneValue
@@ -732,13 +724,39 @@ function initForms() {
 
         phoneInput.setCustomValidity('');
 
+        const turnstileToken = form.querySelector(
+          'input[name="turnstile_token"]'
+        );
+        if (!turnstileToken || !turnstileToken.value) {
+          const turnstileWidget = form.querySelector('.cf-turnstile');
+          if (turnstileWidget && window.turnstile) {
+            fakeButton.style.pointerEvents = 'none';
+            buttonText.textContent = 'Проверка...';
+
+            window.turnstile.execute(turnstileWidget);
+
+            form.setAttribute('data-pending-submit', 'true');
+            return;
+          } else {
+            alert(
+              'Ошибка проверки безопасности. Попробуйте обновить страницу.'
+            );
+            return;
+          }
+        }
+
+        submitForm();
+      });
+
+      function submitForm() {
         fakeButton.style.pointerEvents = 'none';
         buttonText.textContent = 'Подождите';
         arrowWrapper.style.display = 'none';
         loader.style.display = 'block';
-
         trueSubmit.click();
-      });
+      }
+
+      form.submitForm = submitForm;
 
       form.addEventListener('w-form-done', function () {
         fakeButton.style.pointerEvents = 'auto';
