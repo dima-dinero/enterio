@@ -709,14 +709,19 @@ function initForms() {
 
     if (trueSubmit && phoneInput && buttonText && arrowWrapper) {
       fakeButton.addEventListener('click', function () {
+        // Проверка Turnstile токена (временно только логирование)
         const turnstileResponse = form.querySelector(
           'input[name="cf-turnstile-response"]'
         );
         if (!turnstileResponse || !turnstileResponse.value) {
-          alert(
-            'Пожалуйста, пройдите проверку безопасности. Попробуйте обновить страницу.'
-          );
-          return;
+          console.warn('[Turnstile] Token not found on frontend - form will still submit');
+          // Временно не блокируем отправку
+          // alert(
+          //   'Пожалуйста, пройдите проверку безопасности. Попробуйте обновить страницу.'
+          // );
+          // return;
+        } else {
+          console.log('[Turnstile] Token found on frontend, length:', turnstileResponse.value.length);
         }
 
         const phoneValue = phoneInput.value.trim();
