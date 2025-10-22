@@ -693,59 +693,42 @@ function initImageReveal() {
 }
 
 function initForms() {
-  function showTurnstileError(form, message) {
-    let errorMsg = form.querySelector('[data-turnstile-error]');
-
-    if (!errorMsg) {
-      errorMsg = document.createElement('div');
-      errorMsg.setAttribute('data-turnstile-error', '');
-      errorMsg.style.cssText =
-        'color: #ef4444; font-size: 14px; margin-top: 8px; padding: 8px; background: #fee; border-radius: 4px;';
-
-      const turnstileWidget = form.querySelector('.cf-turnstile');
-      if (turnstileWidget && turnstileWidget.parentElement) {
-        turnstileWidget.parentElement.appendChild(errorMsg);
-      }
-    }
-
-    errorMsg.textContent = message;
-    errorMsg.style.display = 'block';
-  }
-
+  // Функция для проверки валидности токена Turnstile
   function validateTurnstileToken(form) {
     const turnstileWidget = form.querySelector('.cf-turnstile');
     if (!turnstileWidget) {
+      // Если виджета нет, разрешаем отправку
       return true;
     }
 
     const formId = form.id || form.getAttribute('name') || 'default';
-    const state = window.turnstileState[formId];
+    const state = window.turnstileState ? window.turnstileState[formId] : null;
     const tokenField = form.querySelector('input[name="turnstile_token"]');
     const tokenValue = tokenField ? tokenField.value.trim() : '';
 
+    // Проверяем наличие токена
     if (!tokenValue) {
-      showTurnstileError(form, 'Пожалуйста, пройдите проверку безопасности.');
+      alert('Пожалуйста, пройдите проверку безопасности.');
       return false;
     }
 
+    // Проверяем состояние
     if (!state || !state.verified) {
-      showTurnstileError(
-        form,
-        'Проверка безопасности не пройдена. Попробуйте снова.'
-      );
+      alert('Проверка безопасности не пройдена. Попробуйте снова.');
       return false;
     }
 
+    // Проверяем не истёк ли токен (токены Turnstile живут ~5 минут)
     const tokenAge = Date.now() - (state.timestamp || 0);
     const fiveMinutes = 5 * 60 * 1000;
     if (tokenAge > fiveMinutes) {
-      showTurnstileError(
-        form,
-        'Проверка безопасности истекла. Пожалуйста, пройдите её заново.'
-      );
+      alert('Проверка безопасности истекла. Пожалуйста, пройдите её заново.');
 
+      // Сбрасываем токен
       if (tokenField) tokenField.value = '';
-      window.turnstileState[formId] = { verified: false, expired: true };
+      if (window.turnstileState) {
+        window.turnstileState[formId] = { verified: false, expired: true };
+      }
 
       return false;
     }
