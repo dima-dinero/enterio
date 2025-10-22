@@ -739,6 +739,13 @@ function initForms() {
 
         phoneInput.setCustomValidity('');
 
+        // Логируем все поля формы перед отправкой
+        const formData = new FormData(form);
+        console.log('[Debug] Form fields before submit:');
+        for (let [key, value] of formData.entries()) {
+          console.log(`  ${key}:`, value);
+        }
+
         fakeButton.style.pointerEvents = 'none';
         buttonText.textContent = 'Подождите';
         arrowWrapper.style.display = 'none';
