@@ -693,11 +693,9 @@ function initImageReveal() {
 }
 
 function initForms() {
-  // Функция для проверки валидности токена Turnstile
   function validateTurnstileToken(form) {
     const turnstileWidget = form.querySelector('.cf-turnstile');
     if (!turnstileWidget) {
-      // Если виджета нет, разрешаем отправку
       return true;
     }
 
@@ -706,29 +704,23 @@ function initForms() {
     const tokenField = form.querySelector('input[name="turnstile_token"]');
     const tokenValue = tokenField ? tokenField.value.trim() : '';
 
-    // Проверяем наличие токена
     if (!tokenValue) {
       alert('Пожалуйста, пройдите проверку безопасности.');
       return false;
     }
 
-    // Проверяем состояние
     if (!state || !state.verified) {
       alert('Проверка безопасности не пройдена. Попробуйте снова.');
       return false;
     }
 
-    // Проверяем не истёк ли токен (токены Turnstile живут ~5 минут)
     const tokenAge = Date.now() - (state.timestamp || 0);
     const fiveMinutes = 5 * 60 * 1000;
     if (tokenAge > fiveMinutes) {
       alert('Проверка безопасности истекла. Пожалуйста, пройдите её заново.');
 
-      // Сбрасываем токен
       if (tokenField) tokenField.value = '';
-      if (window.turnstileState) {
-        window.turnstileState[formId] = { verified: false, expired: true };
-      }
+      window.turnstileState[formId] = { verified: false, expired: true };
 
       return false;
     }
