@@ -707,6 +707,28 @@ function initForms() {
 
     if (loader) loader.style.display = 'none';
 
+    // Копируем токен Turnstile перед отправкой формы
+    function copyTurnstileToken() {
+      const turnstileWidget = form.querySelector('.cf-turnstile');
+      if (turnstileWidget) {
+        // Токен, созданный Turnstile автоматически (внутри виджета)
+        const autoToken = turnstileWidget.querySelector('input[name="cf-turnstile-response"]');
+
+        // Находим все поля с именем cf-turnstile-response
+        const allTokens = form.querySelectorAll('input[name="cf-turnstile-response"]');
+
+        // Берем то поле, которое НЕ внутри виджета (наше скрытое поле)
+        const manualToken = Array.from(allTokens).find(input => !turnstileWidget.contains(input));
+
+        if (autoToken && autoToken.value && manualToken) {
+          manualToken.value = autoToken.value;
+          console.log('[Turnstile] Token copied from widget to form field, length:', autoToken.value.length);
+        } else {
+          console.warn('[Turnstile] Could not copy token - autoToken:', !!autoToken, 'value:', !!autoToken?.value, 'manualToken:', !!manualToken);
+        }
+      }
+    }
+
     if (trueSubmit && phoneInput && buttonText && arrowWrapper) {
       fakeButton.addEventListener('click', function () {
         // Проверка Turnstile токена (временно только логирование)
@@ -738,6 +760,9 @@ function initForms() {
         }
 
         phoneInput.setCustomValidity('');
+
+        // Копируем токен Turnstile из виджета в скрытое поле формы
+        copyTurnstileToken();
 
         // Логируем все поля формы перед отправкой
         const formData = new FormData(form);
