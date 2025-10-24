@@ -121,16 +121,3 @@ document.addEventListener('DOMContentLoaded', () => {
   initEmployeesParallax();
   initEmployeesSlider();
 });
-
-window.addEventListener('resize', () => {
-  clearTimeout(resizeTimeout);
-  resizeTimeout = setTimeout(() => {
-    if (window.innerWidth !== lastWidth) {
-      lastWidth = window.innerWidth;
-      initMarqueeSlider();
-      initScaleVideoAnimation();
-      initEmployeesParallax();
-      initEmployeesSlider();
-    }
-  }, 200);
-});
