@@ -122,9 +122,6 @@ document.addEventListener('DOMContentLoaded', () => {
   initEmployeesSlider();
 });
 
-let resizeTimeout;
-let lastWidth = window.innerWidth;
-
 window.addEventListener('resize', () => {
   clearTimeout(resizeTimeout);
   resizeTimeout = setTimeout(() => {
