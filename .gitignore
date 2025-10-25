@@ -6,12 +6,6 @@ flowise_data/
 
 .vscode/
 
-cloudflare/
-
-chatflows/
-
-supabase/
-
-documents/
+local/
 
 node_modules/
