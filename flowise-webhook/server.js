@@ -14,7 +14,7 @@ const PORT = process.env.WEBHOOK_PORT || 3001;
 const CLOUDFLARE_WORKER_URL = process.env.CLOUDFLARE_WORKER_URL;
 
 const requestTimestamps = new Map();
-const RATE_LIMIT_WINDOW = 60000; // 1 minute
+const RATE_LIMIT_WINDOW = 60000;
 const MAX_REQUESTS_PER_WINDOW = 10;
 
 app.use(express.json());
