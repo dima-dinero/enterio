@@ -4,10 +4,8 @@ WORKDIR /app
 
 COPY package*.json ./
 
-COPY whatsapp-bot/ ./whatsapp-bot/
+COPY api/telegram-bot/ ./telegram-bot/
 
 RUN npm install --production
 
-EXPOSE 3002
-
-CMD ["node", "whatsapp-bot/index.js"]
+CMD ["node", "telegram-bot/index.js"]

@@ -4,7 +4,7 @@ WORKDIR /app
 
 COPY package*.json ./
 
-COPY flowise-webhook/ ./flowise-webhook/
+COPY api/flowise-webhook/ ./flowise-webhook/
 
 RUN npm install --production
 
