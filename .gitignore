@@ -13,3 +13,5 @@ chatflows/
 supabase/
 
 documents/
+
+node_modules/
