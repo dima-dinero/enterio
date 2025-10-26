@@ -8,4 +8,6 @@ flowise_data/
 
 local/
 
+supabase/
+
 node_modules/
