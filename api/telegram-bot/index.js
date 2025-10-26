@@ -10,7 +10,7 @@ const requiredEnvVars = {
 
 Object.entries(requiredEnvVars).forEach(([key, value]) => {
   if (!value) {
-    console.error(`❌ Error: ${key} not found in environment variables`);
+    console.error(`Error: ${key} not found in environment variables`);
     process.exit(1);
   }
 });
