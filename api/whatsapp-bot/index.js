@@ -30,26 +30,13 @@ const app = express();
 app.use(express.json());
 
 const userLastMessage = new Map();
-const conversationHistory = new Map();
 const RATE_LIMIT_MS = 3000;
 const MAX_HISTORY_TURNS = 20;
+const conversationHistory = new Map();
 
 function sanitizeText(text) {
   if (!text) return text;
   return Buffer.from(text, 'utf8').toString('utf8');
-}
-
-function logFlowiseRequest(chatId, question, history) {
-  const turnCount = Math.floor(history.length / 2);
-  console.log(
-    `[WhatsApp] Flowise request chatId=${chatId} historyTurns=${turnCount} questionLength=${question.length}`
-  );
-}
-
-function logFlowiseResponse(chatId, answer) {
-  console.log(
-    `[WhatsApp] Flowise response chatId=${chatId} replyLength=${answer.length}`
-  );
 }
 
 function getHistory(chatId) {
@@ -68,9 +55,6 @@ function saveTurn(chatId, userMessage, botReply) {
       ? updated.slice(updated.length - maxEntries)
       : updated;
   conversationHistory.set(chatId, trimmed);
-  console.log(
-    `[WhatsApp] Stored history chatId=${chatId} messages=${trimmed.length}`
-  );
 }
 
 async function sendWhatsAppMessage(chatId, text) {
@@ -175,7 +159,6 @@ app.post('/webhook', async (req, res) => {
       try {
         const sanitizedMessage = sanitizeText(userMessage);
         const history = getHistory(chatId);
-        logFlowiseRequest(chatId, sanitizedMessage, history);
         const aiResponse = await getFlowiseResponse(
           sanitizedMessage,
           `whatsapp_${chatId}`,
@@ -183,7 +166,6 @@ app.post('/webhook', async (req, res) => {
         );
 
         saveTurn(chatId, sanitizedMessage, aiResponse);
-        logFlowiseResponse(chatId, aiResponse);
         await sendWhatsAppMessage(chatId, aiResponse);
         console.log(`✅ Message sent to ${chatId}`);
       } catch (error) {
