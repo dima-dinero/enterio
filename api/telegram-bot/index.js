@@ -51,8 +51,8 @@ function getHistory(chatId) {
 function saveTurn(chatId, userMessage, botReply) {
   const existing = conversationHistory.get(chatId) || [];
   const updated = existing.concat([
-    ['user', userMessage],
-    ['assistant', botReply],
+    { role: 'userMessage', content: userMessage },
+    { role: 'apiMessage', content: botReply },
   ]);
   const maxEntries = MAX_HISTORY_TURNS * 2;
   const trimmed =
