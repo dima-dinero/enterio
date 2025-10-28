@@ -21,12 +21,53 @@ const CHATFLOW_ID = process.env.CHATFLOW_ID;
 const FLOWISE_API_KEY = process.env.FLOWISE_API_KEY;
 
 const userLastMessage = new Map();
+const conversationHistory = new Map();
 const RATE_LIMIT_MS = 3000;
 const MAX_MESSAGE_LENGTH = 2000;
+const MAX_HISTORY_TURNS = 20;
 
 function sanitizeText(text) {
   if (!text) return text;
   return Buffer.from(text, 'utf8').toString('utf8');
+}
+
+function logFlowiseRequest(chatId, question, history) {
+  const turnCount = Math.floor(history.length / 2);
+  console.log(
+    `[Telegram] Flowise request chatId=${chatId} historyTurns=${turnCount} questionLength=${question.length}`
+  );
+}
+
+function logFlowiseResponse(chatId, answer) {
+  console.log(
+    `[Telegram] Flowise response chatId=${chatId} replyLength=${answer.length}`
+  );
+}
+
+function getHistory(chatId) {
+  return conversationHistory.get(chatId) || [];
+}
+
+function saveTurn(chatId, userMessage, botReply) {
+  const existing = conversationHistory.get(chatId) || [];
+  const updated = existing.concat([
+    ['user', userMessage],
+    ['assistant', botReply],
+  ]);
+  const maxEntries = MAX_HISTORY_TURNS * 2;
+  const trimmed =
+    updated.length > maxEntries
+      ? updated.slice(updated.length - maxEntries)
+      : updated;
+  conversationHistory.set(chatId, trimmed);
+  console.log(
+    `[Telegram] Stored history chatId=${chatId} messages=${trimmed.length}`
+  );
+}
+
+function resetHistory(chatId) {
+  conversationHistory.delete(chatId);
+  console.log(`[Telegram] History reset chatId=${chatId}`);
 }
 
 const bot = new TelegramBot(TELEGRAM_TOKEN, { polling: true });
@@ -36,6 +77,8 @@ console.log('✅ Telegram bot started and ready');
 bot.onText(/\/start/, (msg) => {
   const chatId = msg.chat.id;
   const firstName = msg.from.first_name || '';
+
+  resetHistory(chatId);
 
   bot.sendMessage(
     chatId,
@@ -84,11 +127,14 @@ bot.on('message', async (msg) => {
 
   try {
     const sanitizedMessage = sanitizeText(userMessage);
+    const history = getHistory(chatId);
+    logFlowiseRequest(chatId, sanitizedMessage, history);
 
     const response = await axios.post(
       `${FLOWISE_URL}/api/v1/prediction/${CHATFLOW_ID}`,
       {
         question: sanitizedMessage,
+        history,
         overrideConfig: {
           sessionId: `telegram_${chatId}`,
         },
@@ -108,6 +154,9 @@ bot.on('message', async (msg) => {
       response.data.text ||
       response.data.answer ||
       'Извините, временно не могу вам ответить.';
+
+    saveTurn(chatId, sanitizedMessage, botReply);
+    logFlowiseResponse(chatId, botReply);
 
     clearInterval(typingInterval);
     await bot.sendMessage(chatId, botReply);

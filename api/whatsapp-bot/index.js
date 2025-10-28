@@ -30,11 +30,47 @@ const app = express();
 app.use(express.json());
 
 const userLastMessage = new Map();
+const conversationHistory = new Map();
 const RATE_LIMIT_MS = 3000;
+const MAX_HISTORY_TURNS = 20;
 
 function sanitizeText(text) {
   if (!text) return text;
   return Buffer.from(text, 'utf8').toString('utf8');
+}
+
+function logFlowiseRequest(chatId, question, history) {
+  const turnCount = Math.floor(history.length / 2);
+  console.log(
+    `[WhatsApp] Flowise request chatId=${chatId} historyTurns=${turnCount} questionLength=${question.length}`
+  );
+}
+
+function logFlowiseResponse(chatId, answer) {
+  console.log(
+    `[WhatsApp] Flowise response chatId=${chatId} replyLength=${answer.length}`
+  );
+}
+
+function getHistory(chatId) {
+  return conversationHistory.get(chatId) || [];
+}
+
+function saveTurn(chatId, userMessage, botReply) {
+  const existing = conversationHistory.get(chatId) || [];
+  const updated = existing.concat([
+    ['user', userMessage],
+    ['assistant', botReply],
+  ]);
+  const maxEntries = MAX_HISTORY_TURNS * 2;
+  const trimmed =
+    updated.length > maxEntries
+      ? updated.slice(updated.length - maxEntries)
+      : updated;
+  conversationHistory.set(chatId, trimmed);
+  console.log(
+    `[WhatsApp] Stored history chatId=${chatId} messages=${trimmed.length}`
+  );
 }
 
 async function sendWhatsAppMessage(chatId, text) {
@@ -66,14 +102,13 @@ async function sendWhatsAppMessage(chatId, text) {
   }
 }
 
-async function getFlowiseResponse(userMessage, sessionId) {
+async function getFlowiseResponse(userMessage, sessionId, history) {
   try {
-    const sanitizedMessage = sanitizeText(userMessage);
-
     const response = await axios.post(
       `${FLOWISE_URL}/api/v1/prediction/${CHATFLOW_ID}`,
       {
-        question: sanitizedMessage,
+        question: userMessage,
+        history,
         overrideConfig: {
           sessionId: sessionId,
         },
@@ -138,11 +173,17 @@ app.post('/webhook', async (req, res) => {
       userLastMessage.set(chatId, now);
 
       try {
+        const sanitizedMessage = sanitizeText(userMessage);
+        const history = getHistory(chatId);
+        logFlowiseRequest(chatId, sanitizedMessage, history);
         const aiResponse = await getFlowiseResponse(
-          userMessage,
-          `whatsapp_${chatId}`
+          sanitizedMessage,
+          `whatsapp_${chatId}`,
+          history
         );
 
+        saveTurn(chatId, sanitizedMessage, aiResponse);
+        logFlowiseResponse(chatId, aiResponse);
         await sendWhatsAppMessage(chatId, aiResponse);
         console.log(`✅ Message sent to ${chatId}`);
       } catch (error) {
