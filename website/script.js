@@ -828,6 +828,7 @@ function initDatePicker() {
   new AirDatepicker('input[name="date"]', {
     autoClose: true,
     dateFormat: 'dd.MM.yyyy',
+    minDate: new Date(),
     locale: {
       days: [
         'Воскресенье',
