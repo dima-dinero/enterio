@@ -186,6 +186,15 @@ function initNavbar() {
 
     if (!window.scrollEnabled || scrollDelta < 5 || nearBottom) return;
 
+    if (currentScroll <= 5) {
+      if (scrollDirection !== 1) {
+        scrollDirection = 1;
+        window.toggleNavbar(true);
+      }
+      lastScrollY = currentScroll;
+      return;
+    }
+
     if (currentScroll > lastScrollY && scrollDirection !== 2) {
       scrollDirection = 2;
       window.toggleNavbar(false);
