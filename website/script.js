@@ -378,7 +378,7 @@ function initSliders() {
 
 function initProjectsPreviewSliders(root = document) {
   $(root)
-    .find('.project-preview.w-dyn-list')
+    .find('.project-preview.w-dyn-list, #project-previews .w-dyn-list')
     .each(function () {
       const swiperEl = this;
       if (!swiperEl || swiperEl.swiper) return;
