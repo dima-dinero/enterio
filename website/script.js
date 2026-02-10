@@ -355,6 +355,7 @@ function initSliders() {
       spaceBetween: 0,
       loop: true,
       grabCursor: true,
+      autoplay: { delay: 3000 },
       mousewheel: commonMousewheel,
       breakpoints: {
         ...mobileBreakpoints,
