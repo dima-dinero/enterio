@@ -344,6 +344,35 @@ function initSliders() {
     });
   });
 
+  $('#project-previews').each(function () {
+    const swiperEl = $(this).find('.swiper').get(0);
+    if (!swiperEl || swiperEl.swiper) return;
+
+    new Swiper(swiperEl, {
+      direction: 'horizontal',
+      speed: 700,
+      slidesPerView: 1,
+      spaceBetween: 0,
+      loop: true,
+      grabCursor: true,
+      mousewheel: commonMousewheel,
+      breakpoints: {
+        ...mobileBreakpoints,
+        992: {
+          slidesPerView: 1,
+          spaceBetween: 0,
+          mousewheel: { ...commonMousewheel },
+          centeredSlides: true,
+        },
+      },
+      navigation: {
+        nextEl: $(this).find('.swiper-next')[0],
+        prevEl: $(this).find('.swiper-prev')[0],
+        disabledClass: 'is-disabled',
+      },
+    });
+  });
+
   ['#articles-slider', '#tariffs-slider', '#benefits-slider'].forEach(
     (selector) => {
       $(selector).each(function () {
@@ -378,7 +407,7 @@ function initSliders() {
 
 function initProjectsPreviewSliders(root = document) {
   $(root)
-    .find('.project-preview.w-dyn-list, #project-previews .w-dyn-list')
+    .find('.project-preview.w-dyn-list')
     .each(function () {
       const swiperEl = this;
       if (!swiperEl || swiperEl.swiper) return;
