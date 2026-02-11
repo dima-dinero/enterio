@@ -16,13 +16,13 @@ function validateRussianPhone(phone) {
 }
 
 function getSourceFromSessionId(sessionId) {
-  if (!sessionId) return 'Веб-сайт';
+  if (!sessionId) return 'AI Chat';
 
   if (sessionId.startsWith('whatsapp_')) return 'WhatsApp';
   if (sessionId.startsWith('telegram_')) return 'Telegram';
-  if (sessionId.startsWith('website_')) return 'Веб-сайт';
+  if (sessionId.startsWith('website_')) return 'AI Chat';
 
-  return 'Веб-сайт';
+  return 'AI Chat';
 }
 
 async function sendContacts(contacts, summary) {
@@ -61,13 +61,18 @@ async function sendContacts(contacts, summary) {
     }
 
     const sessionId = $flow.sessionId || '';
-    const source = getSourceFromSessionId(sessionId);
+    const source = $vars?.source || getSourceFromSessionId(sessionId);
 
     const payload = {
       name: name.trim(),
       phone: phoneValidation.formatted,
       summary: summary || 'No conversation data',
       source: source,
+      utm_source: $vars?.utm_source || '',
+      utm_medium: $vars?.utm_medium || '',
+      utm_campaign: $vars?.utm_campaign || '',
+      utm_term: $vars?.utm_term || '',
+      utm_content: $vars?.utm_content || '',
     };
 
     const response = await axios.post(webhookUrl, payload, {
