@@ -19,6 +19,7 @@ const TELEGRAM_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const FLOWISE_URL = process.env.FLOWISE_URL;
 const CHATFLOW_ID = process.env.CHATFLOW_ID;
 const FLOWISE_API_KEY = process.env.FLOWISE_API_KEY;
+const CATALOG_FILE_URL = process.env.CATALOG_FILE_URL;
 
 const userLastMessage = new Map();
 const RATE_LIMIT_MS = 3000;
@@ -67,6 +68,36 @@ bot.onText(/\/start/, (msg) => {
     chatId,
     `Привет, ${firstName}!\n\nЕсли нужна моя помощь с ремонтом или дизайном интерьера — обращайся. Буду рад помочь 😉`
   );
+});
+
+bot.on('chat_member', async (update) => {
+  try {
+    const { new_chat_member } = update;
+
+    if (
+      new_chat_member.status === 'member' ||
+      new_chat_member.status === 'creator' ||
+      new_chat_member.status === 'administrator'
+    ) {
+      const userId = new_chat_member.user.id;
+      const firstName = new_chat_member.user.first_name || 'друг';
+
+      if (CATALOG_FILE_URL) {
+        await bot.sendMessage(
+          userId,
+          `🎉 Спасибо за подписку на наш канал!\n\n📄 Держи обещанный каталог:`
+        );
+
+        await bot.sendDocument(userId, CATALOG_FILE_URL, {
+          caption: 'Каталог Enterio 2026\nВремя скачивания: ~3 секунды',
+        });
+
+        console.log(`✅ Catalog sent to new subscriber: ${firstName} (${userId})`);
+      }
+    }
+  } catch (error) {
+    console.error('❌ Error handling new subscriber:', error.message);
+  }
 });
 
 bot.on('message', async (msg) => {
