@@ -11,12 +11,17 @@
   "scripts": {
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "start:telegram": "node telegram-bot/index.js",
-    "start:webhook": "node flowise-webhook/server.js",
-    "start:whatsapp": "node whatsapp-bot/index.js",
-    "dev:telegram": "nodemon telegram-bot/index.js",
-    "dev:webhook": "nodemon flowise-webhook/server.js",
-    "dev:whatsapp": "nodemon whatsapp-bot/index.js"
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "start:telegram": "node api/telegram-bot/index.js",
+    "start:webhook": "node api/flowise-webhook/server.js",
+    "start:whatsapp": "node api/whatsapp-bot/index.js",
+    "dev:telegram": "nodemon api/telegram-bot/index.js",
+    "dev:webhook": "nodemon api/flowise-webhook/server.js",
+    "dev:whatsapp": "nodemon api/whatsapp-bot/index.js",
+    "worker:dev": "wrangler dev local/cloudflare/worker.js",
+    "worker:deploy": "wrangler deploy --config local/cloudflare/wrangler.toml",
+    "worker:tail": "wrangler tail --config local/cloudflare/wrangler.toml"
   },
   "dependencies": {
     "axios": "^1.7.0",
@@ -25,7 +30,12 @@
     "node-telegram-bot-api": "^0.66.0"
   },
   "devDependencies": {
-    "prettier": "^3.0.0",
-    "nodemon": "^3.0.1"
+    "@eslint/js": "^9.18.0",
+    "eslint": "^9.18.0",
+    "eslint-config-prettier": "^9.1.0",
+    "globals": "^15.14.0",
+    "prettier": "^3.4.2",
+    "nodemon": "^3.1.9",
+    "wrangler": "^3.114.0"
   }
 }

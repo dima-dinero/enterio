@@ -935,7 +935,9 @@ function animateHeroVisuals(startAt = 0) {
 function splitHeroHeading(element, { forResize = false } = {}) {
   try {
     SplitType.revert(element);
-  } catch (_) {}
+  } catch (_) {
+    // Ignore if element is not split yet
+  }
 
   new SplitType(element, { types: 'words' });
 
