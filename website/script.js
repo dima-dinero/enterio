@@ -258,7 +258,7 @@ function initSliders() {
       mousewheel: commonMousewheel,
       breakpoints: {
         ...mobileBreakpoints,
-        992: { slidesPerView: 3, mousewheel: { ...commonMousewheel } },
+        992: { slidesPerView: 3, spaceBetween: 24, mousewheel: { ...commonMousewheel } },
       },
       navigation: {
         nextEl: $(this).find('.swiper-next')[0],
