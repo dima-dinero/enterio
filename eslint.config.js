@@ -51,7 +51,7 @@ export default [
     },
   },
   {
-    files: ['local/cloudflare/**/*.js'],
+    files: ['cloudflare/**/*.js'],
     languageOptions: {
       sourceType: 'module',
     },

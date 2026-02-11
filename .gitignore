@@ -8,6 +8,8 @@ flowise_data/
 
 local/
 
+cloudflare/.wrangler/
+
 supabase/
 
 node_modules/

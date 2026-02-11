@@ -19,9 +19,9 @@
     "dev:telegram": "nodemon api/telegram-bot/index.js",
     "dev:webhook": "nodemon api/flowise-webhook/server.js",
     "dev:whatsapp": "nodemon api/whatsapp-bot/index.js",
-    "worker:dev": "wrangler dev local/cloudflare/worker.js",
-    "worker:deploy": "wrangler deploy --config local/cloudflare/wrangler.toml",
-    "worker:tail": "wrangler tail --config local/cloudflare/wrangler.toml"
+    "worker:dev": "wrangler dev cloudflare/worker.js",
+    "worker:deploy": "wrangler deploy --config cloudflare/wrangler.toml",
+    "worker:tail": "wrangler tail --config cloudflare/wrangler.toml"
   },
   "dependencies": {
     "axios": "^1.7.0",
