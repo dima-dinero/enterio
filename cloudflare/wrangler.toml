@@ -1,0 +1,12 @@
+name = "enterio"
+main = "worker.js"
+compatibility_date = "2024-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Set secrets via: wrangler secret put <SECRET_NAME>
+# Required: BITRIX_BASE, HOOK_SECRET, TURNSTILE_SECRET_KEY
+# Optional: UNISENDER_API_KEY, TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
+
+[[kv_namespaces]]
+binding = "RATE_LIMIT_KV"
+id = "2525f1e7403f4dafb552f4bd360f3a50"
