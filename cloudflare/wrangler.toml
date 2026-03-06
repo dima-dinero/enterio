@@ -4,7 +4,7 @@ compatibility_date = "2024-01-01"
 compatibility_flags = ["nodejs_compat"]
 
 # Set secrets via: wrangler secret put <SECRET_NAME>
-# Required: BITRIX_BASE, HOOK_SECRET, TURNSTILE_SECRET_KEY
+# Required: BITRIX_BASE, HOOK_SECRET, TURNSTILE_SECRET_KEY, AI_BOT_SECRET
 # Optional: UNISENDER_API_KEY, TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
 
 [[kv_namespaces]]

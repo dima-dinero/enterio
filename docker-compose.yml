@@ -25,6 +25,7 @@ services:
       - CORS_ORIGINS=${CORS_ORIGINS}
       - IFRAME_ORIGINS=${IFRAME_ORIGINS}
       - WEBHOOK_URL=${WEBHOOK_URL}
+      - WEBHOOK_AUTH_TOKEN=${WEBHOOK_AUTH_TOKEN}
       - NUMBER_OF_PROXIES=1
     volumes:
       - /opt/enterio/flowise_data:/root/.flowise
@@ -57,10 +58,12 @@ services:
     restart: unless-stopped
     depends_on:
       - flowise
-    ports:
-      - '${WEBHOOK_PORT:-3001}:3001'
+    expose:
+      - '3001'
     environment:
       - CLOUDFLARE_WORKER_URL=${CLOUDFLARE_WORKER_URL}
+      - AI_BOT_SECRET=${AI_BOT_SECRET}
+      - WEBHOOK_AUTH_TOKEN=${WEBHOOK_AUTH_TOKEN}
       - WEBHOOK_PORT=3001
     volumes:
       - ./.env:/app/.env:ro

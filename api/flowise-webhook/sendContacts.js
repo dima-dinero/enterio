@@ -75,9 +75,12 @@ async function sendContacts(contacts, summary) {
       utm_content: $vars?.utm_content || '',
     };
 
+    const webhookAuthToken = process.env.WEBHOOK_AUTH_TOKEN || '';
+
     const response = await axios.post(webhookUrl, payload, {
       headers: {
         'Content-Type': 'application/json',
+        ...(webhookAuthToken && { 'X-Webhook-Token': webhookAuthToken }),
       },
       timeout: 10000,
     });

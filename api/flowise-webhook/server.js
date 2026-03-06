@@ -12,6 +12,8 @@ if (!process.env.CLOUDFLARE_WORKER_URL) {
 const app = express();
 const PORT = process.env.WEBHOOK_PORT || 3001;
 const CLOUDFLARE_WORKER_URL = process.env.CLOUDFLARE_WORKER_URL;
+const WEBHOOK_AUTH_TOKEN = process.env.WEBHOOK_AUTH_TOKEN;
+const AI_BOT_SECRET = process.env.AI_BOT_SECRET;
 
 const requestTimestamps = new Map();
 const RATE_LIMIT_WINDOW = 60000;
@@ -26,6 +28,11 @@ app.use((req, res, next) => {
 
 app.post('/webhook/contacts', async (req, res) => {
   try {
+    const authToken = req.headers['x-webhook-token'];
+    if (!WEBHOOK_AUTH_TOKEN || authToken !== WEBHOOK_AUTH_TOKEN) {
+      return res.status(403).json({ success: false, error: 'Forbidden' });
+    }
+
     const clientId = req.ip || 'unknown';
     const now = Date.now();
     const timestamps = requestTimestamps.get(clientId) || [];
@@ -79,11 +86,14 @@ app.post('/webhook/contacts', async (req, res) => {
     await axios.post(CLOUDFLARE_WORKER_URL, workerData, {
       headers: {
         'Content-Type': 'application/json',
+        ...(AI_BOT_SECRET && { 'X-Bot-Token': AI_BOT_SECRET }),
       },
       timeout: 10000,
     });
 
-    console.log(`✅ Contact processed: ${name} - ${phone}`);
+    console.log(
+      `✅ Contact processed: ${name.charAt(0)}*** - ***${phone.slice(-4)}`
+    );
 
     res.json({
       success: true,
@@ -97,8 +107,7 @@ app.post('/webhook/contacts', async (req, res) => {
 
     res.status(500).json({
       success: false,
-      error: 'Error processing contact',
-      details: error.message,
+      error: 'Internal server error',
     });
   }
 });

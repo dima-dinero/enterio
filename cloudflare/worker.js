@@ -494,7 +494,9 @@ export default {
       const data = extractFormData(rawData);
 
       if (isBlockedPhone(data.phone)) {
-        console.warn('[Phone Block] Blocked phone number:', data.phone);
+        console.warn(
+          '[Phone Block] Blocked phone number: ***' + data.phone.slice(-4)
+        );
         return new Response(
           JSON.stringify({
             ok: false,
@@ -508,6 +510,13 @@ export default {
       }
 
       const isAiBot = data.formName.toLowerCase() === 'ai chat';
+
+      if (isAiBot) {
+        const botToken = request.headers.get('X-Bot-Token');
+        if (!env.AI_BOT_SECRET || botToken !== env.AI_BOT_SECRET) {
+          return new Response('Forbidden', { status: 403 });
+        }
+      }
 
       if (!isAiBot) {
         if (env.TURNSTILE_SECRET_KEY) {
@@ -538,19 +547,18 @@ export default {
         const rateLimitCheck = await checkRateLimit(request, env);
 
         if (!rateLimitCheck.allowed) {
-          const clientIp = request.headers.get('CF-Connecting-IP');
           console.warn(
-            `[Rate Limit] Request blocked - IP: ${clientIp}, Minutes left: ${rateLimitCheck.minutesLeft}`
+            `[Rate Limit] Request blocked. Minutes left: ${rateLimitCheck.minutesLeft}`
           );
           return new Response(
             JSON.stringify({
-              ok: true,
+              ok: false,
               message: rateLimitCheck.message,
               rateLimited: true,
               minutesLeft: rateLimitCheck.minutesLeft,
             }),
             {
-              status: 200,
+              status: 429,
               headers: { 'Content-Type': 'application/json' },
             }
           );
@@ -610,7 +618,10 @@ export default {
       );
     } catch (e) {
       console.error('[Worker] Error:', e?.message, e?.stack);
-      return new Response(`Error: ${e?.message || e}`, { status: 500 });
+      return new Response(
+        JSON.stringify({ ok: false, error: 'Internal server error' }),
+        { status: 500, headers: { 'Content-Type': 'application/json' } }
+      );
     }
   },
 };
