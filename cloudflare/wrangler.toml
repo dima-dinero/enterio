@@ -7,6 +7,10 @@ compatibility_flags = ["nodejs_compat"]
 # Required: BITRIX_BASE, HOOK_SECRET, TURNSTILE_SECRET_KEY, AI_BOT_SECRET
 # Optional: UNISENDER_API_KEY, TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
 
+[observability.logs]
+enabled = false
+invocation_logs = true
+
 [[kv_namespaces]]
 binding = "RATE_LIMIT_KV"
 id = "2525f1e7403f4dafb552f4bd360f3a50"
