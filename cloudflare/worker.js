@@ -510,6 +510,7 @@ export default {
       }
 
       const isAiBot = data.formName.toLowerCase() === 'ai chat';
+      const isWebflow = !!request.headers.get('x-webflow-signature');
 
       if (isAiBot) {
         const botToken = request.headers.get('X-Bot-Token');
@@ -518,7 +519,7 @@ export default {
         }
       }
 
-      if (!isAiBot) {
+      if (!isAiBot && !isWebflow) {
         if (env.TURNSTILE_SECRET_KEY) {
           if (!data.turnstileToken) {
             console.error('[Turnstile] Token missing in request');
